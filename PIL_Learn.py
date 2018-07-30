@@ -20,4 +20,5 @@ def basic_op(path):
     # 裁剪指定区域
     box = (100, 100, 400, 400)
     pil_box = pil_im.crop(box)
+    
 
