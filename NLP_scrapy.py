@@ -4,6 +4,7 @@
 from bs4 import BeautifulSoup
 import requests
 import re
+import time
 
 
 db_cookies = {'__utma':'30149280.1643786549.1477397830.1532749880.1532766953.36',
@@ -28,25 +29,50 @@ db_cookies = {'__utma':'30149280.1643786549.1477397830.1532749880.1532766953.36'
 
 num_per_page = 20
 
+def get_info():
+    count = 0
+    info_list = []
+    while True:
+        num = count * 20
+        count += 1
+        url = 'https://movie.douban.com/subject/26608228/comments?start=%s&limit=20&sort=new_score&status=P' % str(num)
+        try:
+            ret = get_link(url)
+            for line in ret:
+                info_list.append(line)
+            print('comments finished : %s' % str(num), url)
+            time.sleep(0.1)
+        except:
+            break
+    return info_list
+
+
 def get_link(url):
     req = requests.get(url, cookies=db_cookies)
     req.encoding = 'utf-8'
     soup = BeautifulSoup(req.text, 'html.parser')
-    print(soup)
+    # print(soup)
     list_votes = soup.find_all('span',{'class':'votes'})
     list_comment = soup.find_all('span', {'class':'comment-info'})
     list_short = soup.find_all('span', {'class':'short'})
     comment_list = []
     for i in range(num_per_page):
-        print(list_comment[i])
+        # print(list_comment[i])
         cm_id = list_comment[i].find_all('a')[0].text
-        cm_star = list_comment[i].find_all('span', {'class':re.compile(r'^allstar.*')})[0]['title']
+        try:
+            cm_star = list_comment[i].find_all('span', {'class':re.compile(r'^allstar.*')})[0]['title']
+        except:
+            cm_star = ''
         cm_time = list_comment[i].find_all('span', {'class':'comment-time '})[0]['title']
         cm_short = list_short[i].text
         cm_votes = list_votes[i].text
         comment_list.append([cm_id, cm_star, cm_time, cm_short, cm_votes])
-    print(len(comment_list))
+    return comment_list
 
 
 if __name__ == '__main__':
-    get_link('https://movie.douban.com/subject/26608228/comments?start=0&limit=20')
+    data = get_info()
+    for line in data:
+        print(line)
+    print(len(data))
+
