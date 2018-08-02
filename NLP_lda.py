@@ -4,7 +4,8 @@
 import numpy as np
 import pandas as pd
 import re
-
+import gensim
+from gensim import models, similarities, corpora
 
 data_path = 'D:/Python/Data/HillaryEmails.csv'
 
