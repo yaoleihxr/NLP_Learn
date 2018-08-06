@@ -62,11 +62,11 @@ class LDA_model():
         self.num_topics = num_topics
         self.tfidf = tfidf
 
-    def train_model(self):
+    def train_model(self, texts):
         self.dictionary = corpora.Dictionary(texts)
         corpus = [self.dictionary.doc2bow(text) for text in texts]
         if self.tfidf:
-            corpus = models.TfidfModel(corpus)[]
+            corpus = models.TfidfModel(corpus)[corpus]
         self.lda = models.LdaModel(corpus=corpus, id2word=self.dictionary,
                                    num_topics=self.num_topics, minimum_probability=0.001)
 
@@ -100,8 +100,8 @@ if __name__ == '__main__':
     texts = make_corpus(docs)
     texts_train = texts[:4000]
     texts_update = texts[4000:]
-    lda = LDA_model()
-    lda.train_model(texts_train, 10)
+    lda = LDA_model(10)
+    lda.train_model(texts_train)
     lda.save_model(model_path)
     lda.load_model(model_path)
     lda.update_model(texts_update)
