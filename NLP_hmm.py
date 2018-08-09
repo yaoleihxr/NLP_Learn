@@ -41,6 +41,7 @@ def hmm_viterbi(cpd_tags, cpd_tagwords, tags, sent):
     viterbi = []
     backpointer = []
 
+    # 计算第一项，从START开始
     first_viterbi = {}
     first_backpointer = {}
     for tag in tags:
@@ -62,16 +63,27 @@ def hmm_viterbi(cpd_tags, cpd_tagwords, tags, sent):
                 continue
             best_previous = max(prev_viterbi.keys(), key=lambda prevtag:
                                 prev_viterbi[prevtag] * cpd_tags[prevtag].prob(tag) *
-                                cpd_tagwords[prevtag].prob(sent[wordindex]))
+                                cpd_tagwords[tag].prob(sent[wordindex]))
             this_viterbi[tag] = prev_viterbi[best_previous] * cpd_tags[best_previous].prob(tag) * \
-                                cpd_tagwords[best_previous].prob(sent[wordindex])
+                                cpd_tagwords[tag].prob(sent[wordindex])
             this_backpointer[tag] = best_previous
         currbest = max(this_viterbi.keys(), key=lambda tag: this_viterbi[tag])
-        print("Word", "'" + sent[0] + "'", "current best two-tag sequence:", this_backpointer[currbest], currbest)
+        print("Word", "'" + sent[wordindex] + "'", "current best two-tag sequence:", this_backpointer[currbest], currbest)
         viterbi.append(this_viterbi)
         backpointer.append(this_backpointer)
 
-
+    # 计算END,当前的backpionter尚未计算最后一个单词的tag
+    prev_viterbi = viterbi[-1]
+    best_previous = max(prev_viterbi.keys(), key=lambda prevtag : prev_viterbi[prevtag] * cpd_tags[prevtag].prob('END'))
+    prob_tagsequence = prev_viterbi[best_previous] * cpd_tags[best_previous].prob('END')
+    best_tagsequence = ['END', best_previous]
+    backpointer.reverse()
+    current_best_tag = best_previous
+    for bp in backpointer:
+        best_tagsequence.append(bp[current_best_tag])
+        current_best_tag = bp[current_best_tag]
+    best_tagsequence.reverse()
+    return best_tagsequence, prob_tagsequence
 
 
 if __name__ == '__main__':
@@ -81,4 +93,6 @@ if __name__ == '__main__':
     # print(brown_tags_words)
     # print(tags)
     sentence = ['I', 'want','to', 'race']
-    hmm_viterbi(cpd_tags, cpd_tagwords, tags, sentence)
+    best_seq, prob_seq = hmm_viterbi(cpd_tags, cpd_tagwords, tags, sentence)
+    print(best_seq)
+    print(prob_seq)
