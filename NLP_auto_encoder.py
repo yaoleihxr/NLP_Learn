@@ -30,9 +30,24 @@ class ASCIIautoencoder():
         decoded = Dense(self.sen_len, activation='sigmoid')(decoded)
 
         self.autoencoder = Model(inputs=input_text, outputs=decoded)
-        self.decoder = Model(inputs=input_text, outputs=encoded)
+        self.encoder = Model(inputs=input_text, outputs=encoded)
+        self.autoencoder.compile(optimizer='adam', loss='mse')
 
+        self.autoencoder.fit(x=x_train, y=x_train, nb_epoch=self.epoch,
+                             batch_size=1000, shuffle=True)
+
+        x_train = self.encoder.predict(x_train)
+        self.kmeanmodel.fit(x_train)
+
+    def predict(self, x):
+        x_test = self.preprocess(x, length=self.sen_len)
+        x_test = self.encoder.predict(x_test)
+        preds = self.kmeanmodel.predict(x_test)
+        return preds
 
 
     def preprocess(self, s_list, length=256):
          pass
+
+if __name__ == '__main__':
+    pass
