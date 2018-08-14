@@ -121,17 +121,35 @@ def trans_to_matrix(x, model, padding=256, vec_size=128):
                 matrix.append(list(model[sent[i]]))
             except:
                 matrix.append([0] * vec_size)
-        res.append(matrix)
+        res.append([matrix])
     return res
 
-def CNN_model():
+def CNN_model(batch_size=32, n_filter=16, filter_length=4, nb_epoch=5, n_pool=2):
     x_train, x_test, y_train, y_test, corpus = data_load()
     wv_model = train_word2vec(corpus)
     x_train = np.array(trans_to_matrix(x_train, wv_model))
     x_test = np.array(trans_to_matrix(x_test, wv_model))
-    print(x_train.shape)
-    print(x_test.shape)
 
+    model = Sequential()
+    model.add(Conv2D(filters=n_filter, kernel_size=filter_length,
+                     input_shape=(1,256,128), data_format='channels_first'))
+    model.add(Activation('relu'))
+    model.add(Conv2D(filters=n_filter, kernel_size=filter_length, data_format='channels_first'))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(n_pool, n_pool)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1))
+    model.add(Activation('softmax'))
+    model.compile(loss='mse', optimizer='adadelta', metrics=['accuracy'])
+
+    print(model.metrics_names)
+    model.fit(x_train, y_train, batch_size=batch_size, epochs=nb_epoch, verbose=0)
+    score = model.evaluate(x_test, y_test, verbose=0)
+    print(score)
 
 
 if __name__ == '__main__':
