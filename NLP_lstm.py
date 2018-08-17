@@ -105,6 +105,6 @@ if __name__ == '__main__':
     model = lstm_model(x, y)
 
     init = 'Language Models allow us to measure how likely a sentence is, which is an important for Machine'
-    article = generate_article(init)
+    article = generate_article(init, wv_model, model)
     print(article)
 
