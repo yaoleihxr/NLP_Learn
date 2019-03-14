@@ -64,11 +64,9 @@ def Attention(Q, K, V, nb_head, size_per_head, Q_len=None, V_len=None):
     Q = tf.reshape(Q, (-1, tf.shape(Q)[1], nb_head, size_per_head))
     # 将Q转置为形如(batch_size, nb_head， seq_len, size_per_head)的张量；
     Q = tf.transpose(Q, [0, 2, 1, 3])
-
     K = Dense(K, nb_head * size_per_head, False)
     K = tf.reshape(K, (-1, tf.shape(K)[1], nb_head, size_per_head))
     K = tf.transpose(K, [0, 2, 1, 3])
-
     V = Dense(V, nb_head * size_per_head, False)
     V = tf.reshape(V, (-1, tf.shape(V)[1], nb_head, size_per_head))
     V = tf.transpose(V, [0, 2, 1, 3])
