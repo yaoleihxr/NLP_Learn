@@ -72,12 +72,16 @@ def Attention(Q, K, V, nb_head, size_per_head, Q_len=None, V_len=None):
     V = tf.transpose(V, [0, 2, 1, 3])
     #计算内积，然后mask，然后softmax
     A = tf.matmul(Q, K, transpose_b=True) / tf.sqrt(float(size_per_head))
+    # A为形如(batch_size, nb_head， seq_len, seq_len)的张量；
     A = tf.transpose(A, [0, 3, 2, 1])
+    # A为形如(batch_size, seq_len， seq_len, nb_head)的张量；
     A = Mask(A, V_len, mode='add')
     A = tf.transpose(A, [0, 3, 2, 1])
+    # A为形如(batch_size, nb_head， seq_len, seq_len)的张量；
     A = tf.nn.softmax(A)
     #输出并mask
     O = tf.matmul(A, V)
+    # O为形如(batch_size, nb_head， seq_len, size_per_head)的张量；
     O = tf.transpose(O, [0, 2, 1, 3])
     O = tf.reshape(O, (-1, tf.shape(O)[1], nb_head * size_per_head))
     O = Mask(O, Q_len, 'mul')
